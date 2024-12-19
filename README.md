@@ -92,11 +92,15 @@ The model is fitted by placing independent and conjugate prior distributions on 
 
 The algorithm works iteratively. At step t, it takes  \([x_i^{(t−1)}]^N_{i=1}\) and the next iteration is given by the "Q-function" which represents the expectation of the logarithm of the joint posterior distribution. The formula for the Q-function in this setting is given below.
 
-\[Q([x_i]^N_{i=1} , [β^*_j]^J_{j=1}) = \mathbb{E}[\log p(Y^*,[x_i]^N_{i=1} , [β^*_j]^J_{j=1}|Y) |Y, [x_i^{(t-1)}]^N_{i=1} , [β^{*(t-1)}_j]^J_{j=1}])\]
+```math
+Q([x_i]^N_{i=1} , [β^*_j]^J_{j=1}) = \mathbb{E}[\log p(Y^*,[x_i]^N_{i=1} , [β^*_j]^J_{j=1}|Y) |Y, [x_i^{(t-1)}]^N_{i=1} , [β^{*(t-1)}_j]^J_{j=1}])
+```
 
 This maximization has a closed-form solution. The resulting values for the ideal point, item discrimination and item difficulty estimates are given as
 
-\[x_i^{(t)}= (\Sigma_x^{-1} + \sum_{j=1}^Jβ_j^{(t-1)}β_j^{(t-1)⊤})^{-1} \times  (\Sigma_x^{-1} \mu_x + \sum_{j=1}^Jβ_j^{(t-1)}(y_{i,j}^{*(t)}-\alpha_j^{(t-1)})\]
+```math
+x_i^{(t)}= (\Sigma_x^{-1} + \sum_{j=1}^Jβ_j^{(t-1)}β_j^{(t-1)⊤})^{-1} \times  (\Sigma_x^{-1} \mu_x + \sum_{j=1}^Jβ_j^{(t-1)}(y_{i,j}^{*(t)}-\alpha_j^{(t-1)})
+```
 
 \[β_j^{*(t)} = (\Sigma_{β^*}^{-1} + \sum_{i=1}^Nx_i^{*(t)}x_i^{*(t)⊤})^{-1} \times  (\Sigma_{β^*}^{-1} \mu_{β^*} + \sum_{i=1}^N x_i^{*(t)}  (y_{i,j}^{*(t)})\]
 Even though this algorithm is designed for estimating K-dimensional item discrimination and ideal point models, in practice the software in the public R package emIRT() can only fit 1-dimensional models. Also, in the software observed $y_{i,j}$ values are inputted as 1 if positive, -1 if negative, and 0 if missing. 
@@ -106,30 +110,44 @@ Even though this algorithm is designed for estimating K-dimensional item discrim
 The SoftImpute algorithm, just like the emIRT, requires input data to be in wide format. Moreover, it allows numerical values of y. SoftImpute is mainly a matrix completion algorithm that fills the missing entries while minimizing the rank of the resulting matrix. By doing so, the algorithm tries to create dependent predictions that mimic the other users with similar preferences. The minimization problem behind the algorithm can be written as 
 
 
-\[\begin{equation}
+```math
 \min ∥Z∥_*
-\end{equation}\] subject to 
- \[\sum_{(i,j) \in Ω} (X_{i,j}−Z_{i,j})^2≤δ\]  
+``` subject to 
+```math
+\sum_{(i,j) \in Ω} (X_{i,j}−Z_{i,j})^2≤δ
+``` 
  This minimization problem can also rewritten as
-\[\begin{equation}
+```math
 \frac{1}{2} \sum_{(i,j) \in Ω}  (X_{i,j}−Z_{i,j})^2 + \lambda ∥Z∥_*
-\end{equation}\] 
+```
 Here, \(Z\) is the resulting, complete matrix. \(Ω\) is the set of indices of the observed \(y\)  values, and  \(X\) is the initial incomplete matrix. \(∥Z∥_*\), also known as the nuclear norm, is used as a regularizer. $\lambda$  is the parameter used for shrinkage of the nuclear norm.  (Hastie, 2010)
 
 In the first formulation when  \(\delta\) is set to 0, the minimization problem requires 0 training error, possibly resulting in over-fitted solutions.  In the second form, a minimizer matrix $Z$ is available on the closed form and is given by $Z^* = S_λ(W)$ where 
-\[S_λ(W) =  UD_{\lambda}V^⊤\] with \(D_{\lambda} =\) diag \([(d_1 - \lambda), ..., (d_r - \lambda)]\). In other words, \(S_{\lambda}(W)\) is the singular value decomposition of \(W\).
+```math
+S_λ(W) =  UD_{\lambda}V^⊤\] with \(D_{\lambda} =\) diag \([(d_1 - \lambda), ..., (d_r - \lambda)]\).
+```
+ In other words, 
+ ```math
+S_{\lambda}(W)
+```
+is the singular value decomposition of \(W\).
 
 The SoftImpute algorithm solves the minimization problem in the second form using the result provided above. One advantage of this form is it relaxes the rank constraint. So, instead of calculating both SVD and optimal rank for minimization, only the SVD iterations are calculated and rank reduction occurs at the same time as shrinkage. At each step, the SoftImpute algorithm iterates between filling the matrix with the current SVD and then updating the SVD using this new complete matrix. 
 
 The first iteration starts with filling the missing entries by 0. Thus,
-\[P_Ω(Y)_{i,j} =
+```math
+P_Ω(Y)_{i,j} =
    \left\{\begin{array}{lr}
        Y_{i,j}, & (i,j) \in Ω \\
        0, & (i,j) \not \in  Ω 
-    \end{array}\right\]
+    \end{array}\right\
+```
 
 Then, the new matrix is calculated as 
-\[Z^{new} = S_{\lambda}(P_Ω(X) + P^⊥_Ω(Z^{old}))\] If $Z$ converges the algorithm is exited. If not, $Z^{old}  ← Z^{new}$ and the loop continues until convergence occurs or the maximum number of iterations is reached. 
+```math
+Z^{new} = S_{\lambda}(P_Ω(X) + P^⊥_Ω(Z^{old}))
+```
+If $Z$ converges the algorithm is exited. If not, $Z^{old}  ← Z^{new}$ and the loop continues until convergence occurs or the maximum number of iterations is reached. 
 
 ### 3.4 The Link Between emIRT and SoftImpute
 
