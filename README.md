@@ -61,7 +61,7 @@ Below is the histogram of normalized ratings using that normalization approach.
 
 After the normalization, deciding on a threshold is still an important step. Two alternative thresholds are examined. In the first one, a rating was deemed positive if it was at least 1 point higher than the user’s mean reviews. However, this model was highly conservative, assigning a significant amount of ratings as bad reviews. Indeed, with this method, 20% of the users did not give any positive ratings. In the second threshold alternative, a rating is considered positive if it is strictly greater than the user’s mean rating. This alternative is chosen because it conveys the information of what each user liked without being extremely conservative. The formulation of normalization is given below where $y_{i,j}$ is the rating given by user $i$ to movie $j$ and $\mu_i$ is the mean rating given by user $i$.
 
- $$y^*_{i,j} =  y_{i,j}  -\mu_i$$
+ \(y^*_{i,j} =  y_{i,j}  -\mu_i\)
   
 
 ### 2.3 Train Test Split
@@ -82,52 +82,52 @@ For fitting mixed effects models, various methods and algorithms have been devel
 
 The expectation-maximization algorithm developed by Imai requires a wide format of data. Each user is represented by a row index whereas each item is represented by a column index. In the binary model, the output variable $y_{i,j}$ represents the  propensity of user $i$  to cast a positive vote ($y^* >0$) to item $j$. Missing data is assumed to be random and ignorable. (Imai, 2016)
 
-The standard K-dimensional model is given as, $$y_{i,j} = α_j +x^⊤_i β_j +ε_{i,j}$$ 
+The standard K-dimensional model is given as, \(y_{i,j} = α_j +x^⊤_i β_j +ε_{i,j}\) 
 
-where $β_j$ is the K-dimensional column vector of item discrimination parameters and $α_j$ is the scalar item difficulty parameter. Finally, $ε_{i,j}$ is an independently, identically distributed random error and is assumed to follow the standard normal distribution. Note that in this model, there is no vector for user fixed effects. 
+where \(β_j\) is the K-dimensional column vector of item discrimination parameters and \(α_j\)  is the scalar item difficulty parameter. Finally,  \(ε_{i,j}\) is an independently, identically distributed random error and is assumed to follow the standard normal distribution. Note that in this model, there is no vector for user fixed effects. 
 
-The model is fitted by placing independent and conjugate prior distributions on $x^*_i = (1, x_i^⊤)$ and $β^*_j = (α_j , β^⊤_j )$. Given the prior means and covariance matrices for these vectors, the joint posterior distribution is maximized using the proposed expectation maximization algorithm. 
+The model is fitted by placing independent and conjugate prior distributions on \(x^*_i = (1, x_i^⊤)\) and \(β^*_j = (α_j , β^⊤_j )\). Given the prior means and covariance matrices for these vectors, the joint posterior distribution is maximized using the proposed expectation maximization algorithm. 
 
-The algorithm works iteratively. At step t, it takes $[x_i^{(t−1)}]^N_{i=1}$ and $[β_j^{*(t−1)}]^J_{j=1}$ and the next iteration is given by the "Q-function" which represents the expectation of the logarithm of the joint posterior distribution. The formula for the Q-function in this setting is given below.
+The algorithm works iteratively. At step t, it takes  \([x_i^{(t−1)}]^N_{i=1}\) and the next iteration is given by the "Q-function" which represents the expectation of the logarithm of the joint posterior distribution. The formula for the Q-function in this setting is given below.
 
-$$Q([x_i]^N_{i=1} , [β^*_j]^J_{j=1}) = \\ E[\log p(Y^*,[x_i]^N_{i=1} , [β^*_j]^J_{j=1}|Y) |Y, [x_i^{(t-1)}]^N_{i=1} , [β^{*(t-1)}_j]^J_{j=1})]$$  
+\[Q([x_i]^N_{i=1} , [β^*_j]^J_{j=1}) = \mathbb{E}[\log p(Y^*,[x_i]^N_{i=1} , [β^*_j]^J_{j=1}|Y) |Y, [x_i^{(t-1)}]^N_{i=1} , [β^{*(t-1)}_j]^J_{j=1}])\]
 
 This maximization has a closed-form solution. The resulting values for the ideal point, item discrimination and item difficulty estimates are given as
 
-$$x_i^{(t)}= \\ (\Sigma_x^{-1} + \sum_{j=1}^Jβ_j^{(t-1)}β_j^{(t-1)⊤})^{-1} \times  (\Sigma_x^{-1} \mu_x + \sum_{j=1}^Jβ_j^{(t-1)}(y_{i,j}^{*(t)}-\alpha_j^{(t-1)})$$
-    
- $$β_j^{*(t)} = (\Sigma_{β^*}^{-1} + \sum_{i=1}^Nx_i^{*(t)}x_i^{*(t)⊤})^{-1} \times  (\Sigma_{β^*}^{-1} \mu_{β^*} + \sum_{i=1}^N x_i^{*(t)}  (y_{i,j}^{*(t)})$$
+\[x_i^{(t)}= (\Sigma_x^{-1} + \sum_{j=1}^Jβ_j^{(t-1)}β_j^{(t-1)⊤})^{-1} \times  (\Sigma_x^{-1} \mu_x + \sum_{j=1}^Jβ_j^{(t-1)}(y_{i,j}^{*(t)}-\alpha_j^{(t-1)})\]
 
+\[β_j^{*(t)} = (\Sigma_{β^*}^{-1} + \sum_{i=1}^Nx_i^{*(t)}x_i^{*(t)⊤})^{-1} \times  (\Sigma_{β^*}^{-1} \mu_{β^*} + \sum_{i=1}^N x_i^{*(t)}  (y_{i,j}^{*(t)})\]
 Even though this algorithm is designed for estimating K-dimensional item discrimination and ideal point models, in practice the software in the public R package emIRT() can only fit 1-dimensional models. Also, in the software observed $y_{i,j}$ values are inputted as 1 if positive, -1 if negative, and 0 if missing. 
 
 ### 3.3 SoftImpute Model and Algorithm
 
 The SoftImpute algorithm, just like the emIRT, requires input data to be in wide format. Moreover, it allows numerical values of y. SoftImpute is mainly a matrix completion algorithm that fills the missing entries while minimizing the rank of the resulting matrix. By doing so, the algorithm tries to create dependent predictions that mimic the other users with similar preferences. The minimization problem behind the algorithm can be written as 
 
-$$\begin{equation}
-\min ∥Z∥_*
-\end{equation}$$ subject to 
- $$\sum_{(i,j) \in Ω} (X_{i,j}−Z_{i,j})^2≤δ$$  
- This minimization problem can also rewritten as
-$$\begin{equation}
-\frac{1}{2} \sum_{(i,j) \in Ω}  (X_{i,j}−Z_{i,j})^2 + \lambda ∥Z∥_*
-\end{equation}$$ 
-Here, $Z$ is the resulting, complete matrix. $Ω$ is the set of indices of the observed $y$ values, and $X$ is the initial incomplete matrix. $∥Z∥_*$, also known as the nuclear norm, is used as a regularizer. $\lambda$  is the parameter used for shrinkage of the nuclear norm.  (Hastie, 2010)
 
-In the first formulation when $\delta$ is set to 0, the minimization problem requires 0 training error, possibly resulting in over-fitted solutions.  In the second form, a minimizer matrix $Z$ is available on the closed form and is given by $Z^* = S_λ(W)$ where 
-$$S_λ(W) =  UD_{\lambda}V^⊤$$ with $D_{\lambda} =$ diag $[(d_1 - \lambda), ..., (d_r - \lambda)]$. In other words, $S_{\lambda}(W)$ is the singular value decomposition of $W$.
+\[\begin{equation}
+\min ∥Z∥_*
+\end{equation}\] subject to 
+ \[\sum_{(i,j) \in Ω} (X_{i,j}−Z_{i,j})^2≤δ\]  
+ This minimization problem can also rewritten as
+\[\begin{equation}
+\frac{1}{2} \sum_{(i,j) \in Ω}  (X_{i,j}−Z_{i,j})^2 + \lambda ∥Z∥_*
+\end{equation}\] 
+Here, \(Z\) is the resulting, complete matrix. \(Ω\) is the set of indices of the observed \(y\)  values, and  \(X\) is the initial incomplete matrix. \(∥Z∥_*\), also known as the nuclear norm, is used as a regularizer. $\lambda$  is the parameter used for shrinkage of the nuclear norm.  (Hastie, 2010)
+
+In the first formulation when  \(\delta\) is set to 0, the minimization problem requires 0 training error, possibly resulting in over-fitted solutions.  In the second form, a minimizer matrix $Z$ is available on the closed form and is given by $Z^* = S_λ(W)$ where 
+\[S_λ(W) =  UD_{\lambda}V^⊤\] with \(D_{\lambda} =\) diag \([(d_1 - \lambda), ..., (d_r - \lambda)]\). In other words, \(S_{\lambda}(W)\) is the singular value decomposition of \(W\).
 
 The SoftImpute algorithm solves the minimization problem in the second form using the result provided above. One advantage of this form is it relaxes the rank constraint. So, instead of calculating both SVD and optimal rank for minimization, only the SVD iterations are calculated and rank reduction occurs at the same time as shrinkage. At each step, the SoftImpute algorithm iterates between filling the matrix with the current SVD and then updating the SVD using this new complete matrix. 
 
 The first iteration starts with filling the missing entries by 0. Thus,
-$$P_Ω(Y)_{i,j} =
+\[P_Ω(Y)_{i,j} =
    \left\{\begin{array}{lr}
        Y_{i,j}, & (i,j) \in Ω \\
        0, & (i,j) \not \in  Ω 
-    \end{array}\right$$
+    \end{array}\right\]
 
 Then, the new matrix is calculated as 
-$$Z^{new} = S_{\lambda}(P_Ω(X) + P^⊥_Ω(Z^{old}))$$ If $Z$ converges the algorithm is exited. If not, $Z^{old}  ← Z^{new}$ and the loop continues until convergence occurs or the maximum number of iterations is reached. 
+\[Z^{new} = S_{\lambda}(P_Ω(X) + P^⊥_Ω(Z^{old}))\] If $Z$ converges the algorithm is exited. If not, $Z^{old}  ← Z^{new}$ and the loop continues until convergence occurs or the maximum number of iterations is reached. 
 
 ### 3.4 The Link Between emIRT and SoftImpute
 
