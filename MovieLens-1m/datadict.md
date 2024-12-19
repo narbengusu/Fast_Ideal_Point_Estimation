@@ -3,3 +3,5 @@ Unlike other versions of the MovieLens data, the 1 million version includes not 
 In this dataset, there are three files: ratings, users, and movies. 
 In the ratings file, there are 1,000,209 anonymous ratings of 3,706 movies made by 6,040 users. 
 For each rating, user ID, movie ID, timestamp, and rating score are provided. Ratings are on a scale from 1 to 5 with 1-point increments. 
+
+Please download the necessary version from their website(https://grouplens.org/datasets/movielens/1m/), I am not sharing the data here as it might be a violation of MovieLens's license. 
