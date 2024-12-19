@@ -88,7 +88,7 @@ The standard K-dimensional model is given as, $y_{i,j} = α_j +x^⊤_i β_j +ε_
 
 where $β_j$ is the K-dimensional column vector of item discrimination parameters and $α_j$  is the scalar item difficulty parameter. Finally,  $ε_{i,j}$ is an independently, identically distributed random error and is assumed to follow the standard normal distribution. Note that in this model, there is no vector for user fixed effects. 
 
-The model is fitted by placing independent and conjugate prior distributions on $x^*_i = (1, x_i^⊤)$ and $β^*_j = (α_j , β^⊤_j )$. Given the prior means and covariance matrices for these vectors, the joint posterior distribution is maximized using the proposed expectation maximization algorithm. 
+The model is fitted by placing independent and conjugate prior distributions on $x^*_i = [1, x_i^{\tau}]$ and $\beta^*_j = [α_j , β^{\tau}_j]$. Given the prior means and covariance matrices for these vectors, the joint posterior distribution is maximized using the proposed expectation maximization algorithm. 
 
 The algorithm works iteratively. At step t, it takes  $[x_i^{(t−1)}]^N_{i=1}$ and the next iteration is given by the "Q-function" which represents the expectation of the logarithm of the joint posterior distribution. The formula for the Q-function in this setting is given below.
 
@@ -98,7 +98,7 @@ Q([x_i]^N_{i=1} , [β^*_j]^J_{j=1}) = \mathbb{E}[\log p(Y^*,[x_i]^N_{i=1} , [β^
 
 This maximization has a closed-form solution. The resulting values for the ideal point is given as
 ```math
-x_i^{(t)}= (\Sigma_x^{-1} + \sum_{j=1}^Jβ_j^{(t-1)}β_j^{(t-1)⊤})^{-1} \times  Sigma_x^{-1} \mu_x + \sum_{j=1}^Jβ_j^{(t-1)}(y_{i,j}^{*(t)}-\alpha_j^{(t-1)})
+x_i^{(t)}= (\Sigma_x^{-1} + \sum_{j=1}^Jβ_j^{(t-1)}β_j^{(t-1)⊤})^{-1} \times  \Sigma_x^{-1} \mu_x + \sum_{j=1}^Jβ_j^{(t-1)}(y_{i,j}^{*(t)}-\alpha_j^{(t-1)})
 ```
 Similarly, for item discrimination and difficulty is given as:
 ```math
@@ -110,8 +110,10 @@ Even though this algorithm is designed for estimating K-dimensional item discrim
 
 The SoftImpute algorithm, just like the emIRT, requires input data to be in wide format. Moreover, it allows numerical values of y. SoftImpute is mainly a matrix completion algorithm that fills the missing entries while minimizing the rank of the resulting matrix. By doing so, the algorithm tries to create dependent predictions that mimic the other users with similar preferences. The minimization problem behind the algorithm can be written as 
 
-
-$ \min ∥Z∥_* $ subject to $ \sum_{(i,j) \in Ω} (X_{i,j}−Z_{i,j})^2≤δ $
+```math
+\min ∥Z∥_*, st.
+\sum_{(i,j) \in Ω} (X_{i,j}−Z_{i,j})^2≤δ
+```
  This minimization problem can also rewritten as
 ```math
 \frac{1}{2} \sum_{(i,j) \in Ω}  (X_{i,j}−Z_{i,j})^2 + \lambda ∥Z∥_*
@@ -120,8 +122,9 @@ Here, $Z$ is the resulting, complete matrix. $Ω$ is the set of indices of the o
 
 In the first formulation when $\delta$ is set to 0, the minimization problem requires 0 training error, possibly resulting in over-fitted solutions.  In the second form, a minimizer matrix $Z$ is available on the closed form and is given by $Z^* = S_λ(W)$ where 
 ```math
-S_λ(W) =  UD_{\lambda}V^⊤\] with \(D_{\lambda} =\) diag \([(d_1 - \lambda), ..., (d_r - \lambda)]\)
+S_λ(W) =  UD_{\lambda}V^⊤ 
 ```
+Where  $D_{\lambda} =\) diag \([(d_1 - \lambda), ..., (d_r - \lambda)]$
  In other words, $S_{\lambda}(W)$ is the singular value decomposition of $W$.
 
 The SoftImpute algorithm solves the minimization problem in the second form using the result provided above. One advantage of this form is it relaxes the rank constraint. So, instead of calculating both SVD and optimal rank for minimization, only the SVD iterations are calculated and rank reduction occurs at the same time as shrinkage. At each step, the SoftImpute algorithm iterates between filling the matrix with the current SVD and then updating the SVD using this new complete matrix. 
