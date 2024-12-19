@@ -61,7 +61,7 @@ Below is the histogram of normalized ratings using that normalization approach.
 
 After the normalization, deciding on a threshold is still an important step. Two alternative thresholds are examined. In the first one, a rating was deemed positive if it was at least 1 point higher than the user’s mean reviews. However, this model was highly conservative, assigning a significant amount of ratings as bad reviews. Indeed, with this method, 20% of the users did not give any positive ratings. In the second threshold alternative, a rating is considered positive if it is strictly greater than the user’s mean rating. This alternative is chosen because it conveys the information of what each user liked without being extremely conservative. The formulation of normalization is given below where $y_{i,j}$ is the rating given by user $i$ to movie $j$ and $\mu_i$ is the mean rating given by user $i$.
 
-$$ y^*_{i,j} =  y_{i,j}  -\mu_i $$
+ $$y^*_{i,j} =  y_{i,j}  -\mu_i$$
   
 
 ### 2.3 Train Test Split
@@ -94,9 +94,9 @@ $$Q([x_i]^N_{i=1} , [β^*_j]^J_{j=1}) = \\ E[\log p(Y^*,[x_i]^N_{i=1} , [β^*_j]
 
 This maximization has a closed-form solution. The resulting values for the ideal point, item discrimination and item difficulty estimates are given as
 
-$$ x_i^{(t)}= \\ (\Sigma_x^{-1} + \sum_{j=1}^Jβ_j^{(t-1)}β_j^{(t-1)⊤})^{-1} \times  (\Sigma_x^{-1} \mu_x + \sum_{j=1}^Jβ_j^{(t-1)}(y_{i,j}^{*(t)}-\alpha_j^{(t-1)})$$
+$$x_i^{(t)}= \\ (\Sigma_x^{-1} + \sum_{j=1}^Jβ_j^{(t-1)}β_j^{(t-1)⊤})^{-1} \times  (\Sigma_x^{-1} \mu_x + \sum_{j=1}^Jβ_j^{(t-1)}(y_{i,j}^{*(t)}-\alpha_j^{(t-1)})$$
     
- $$ β_j^{*(t)} = (\Sigma_{β^*}^{-1} + \sum_{i=1}^Nx_i^{*(t)}x_i^{*(t)⊤})^{-1} \times  (\Sigma_{β^*}^{-1} \mu_{β^*} + \sum_{i=1}^N x_i^{*(t)}  (y_{i,j}^{*(t)})$$
+ $$β_j^{*(t)} = (\Sigma_{β^*}^{-1} + \sum_{i=1}^Nx_i^{*(t)}x_i^{*(t)⊤})^{-1} \times  (\Sigma_{β^*}^{-1} \mu_{β^*} + \sum_{i=1}^N x_i^{*(t)}  (y_{i,j}^{*(t)})$$
 
 Even though this algorithm is designed for estimating K-dimensional item discrimination and ideal point models, in practice the software in the public R package emIRT() can only fit 1-dimensional models. Also, in the software observed $y_{i,j}$ values are inputted as 1 if positive, -1 if negative, and 0 if missing. 
 
@@ -104,38 +104,36 @@ Even though this algorithm is designed for estimating K-dimensional item discrim
 
 The SoftImpute algorithm, just like the emIRT, requires input data to be in wide format. Moreover, it allows numerical values of y. SoftImpute is mainly a matrix completion algorithm that fills the missing entries while minimizing the rank of the resulting matrix. By doing so, the algorithm tries to create dependent predictions that mimic the other users with similar preferences. The minimization problem behind the algorithm can be written as 
 
-$$ \begin{equation}
+$$\begin{equation}
 \min ∥Z∥_*
-\end{equation}
-$$ subject to 
+\end{equation}$$ subject to 
  $$\sum_{(i,j) \in Ω} (X_{i,j}−Z_{i,j})^2≤δ$$  
  This minimization problem can also rewritten as
-$$ \begin{equation}
+$$\begin{equation}
 \frac{1}{2} \sum_{(i,j) \in Ω}  (X_{i,j}−Z_{i,j})^2 + \lambda ∥Z∥_*
-\end{equation} $$ 
+\end{equation}$$ 
 Here, $Z$ is the resulting, complete matrix. $Ω$ is the set of indices of the observed $y$ values, and $X$ is the initial incomplete matrix. $∥Z∥_*$, also known as the nuclear norm, is used as a regularizer. $\lambda$  is the parameter used for shrinkage of the nuclear norm.  (Hastie, 2010)
 
 In the first formulation when $\delta$ is set to 0, the minimization problem requires 0 training error, possibly resulting in over-fitted solutions.  In the second form, a minimizer matrix $Z$ is available on the closed form and is given by $Z^* = S_λ(W)$ where 
-$$ S_λ(W) =  UD_{\lambda}V^⊤$$ with $D_{\lambda} =$ diag $[(d_1 - \lambda), ..., (d_r - \lambda)]$. In other words, $S_{\lambda}(W)$ is the singular value decomposition of $W$.
+$$S_λ(W) =  UD_{\lambda}V^⊤$$ with $D_{\lambda} =$ diag $[(d_1 - \lambda), ..., (d_r - \lambda)]$. In other words, $S_{\lambda}(W)$ is the singular value decomposition of $W$.
 
 The SoftImpute algorithm solves the minimization problem in the second form using the result provided above. One advantage of this form is it relaxes the rank constraint. So, instead of calculating both SVD and optimal rank for minimization, only the SVD iterations are calculated and rank reduction occurs at the same time as shrinkage. At each step, the SoftImpute algorithm iterates between filling the matrix with the current SVD and then updating the SVD using this new complete matrix. 
 
 The first iteration starts with filling the missing entries by 0. Thus,
-$$ P_Ω(Y)_{i,j} =
+$$P_Ω(Y)_{i,j} =
    \left\{\begin{array}{lr}
        Y_{i,j}, & (i,j) \in Ω \\
        0, & (i,j) \not \in  Ω 
-    \end{array}\right.
-$$
+    \end{array}\right$$
 
 Then, the new matrix is calculated as 
-$$ Z^{new} = S_{\lambda}(P_Ω(X) + P^⊥_Ω(Z^{old}) )$$ If $Z$ converges the algorithm is exited. If not, $Z^{old}  ← Z^{new}$ and the loop continues until convergence occurs or the maximum number of iterations is reached. 
+$$Z^{new} = S_{\lambda}(P_Ω(X) + P^⊥_Ω(Z^{old}))$$ If $Z$ converges the algorithm is exited. If not, $Z^{old}  ← Z^{new}$ and the loop continues until convergence occurs or the maximum number of iterations is reached. 
 
 ### 3.4 The Link Between emIRT and SoftImpute
 
 Even though, SoftImpute and emIRT algorithms look greatly different there are certain similarities. Hastie et. al. establish that SoftImpute and Maximum-Margin Matrix Factorization models are closely related. MMMF solves the minimization problem 
 
-$$ \min_{U, V} \frac{1}{2} || P_Ω(X - UV) ||^2 +  \frac{\lambda}{2}(||U||^2 + ||V||^2)$$ where $U$ is an $m$ by $r$ and $V$ is an $n$ by $r$  non-orthogonal arbitrary matrix. Hastie proves that under some conditions the solution space of SoftImpute is contained in the solution space of MMMF. These conditions are $r = \min (m, n)$, and  $Z^*$  is solved under $\lambda > 0$  with rank $r$. In other words, under these assumptions, a solution to the SoftImpute minimization problem is also a solution to the MMMF minimization problem. 
+$$\min_{U, V} \frac{1}{2} || P_Ω(X - UV) ||^2 +  \frac{\lambda}{2}(||U||^2 + ||V||^2)$$ where $U$ is an $m$ by $r$ and $V$ is an $n$ by $r$  non-orthogonal arbitrary matrix. Hastie proves that under some conditions the solution space of SoftImpute is contained in the solution space of MMMF. These conditions are $r = \min (m, n)$, and  $Z^*$  is solved under $\lambda > 0$  with rank $r$. In other words, under these assumptions, a solution to the SoftImpute minimization problem is also a solution to the MMMF minimization problem. 
 
 In addition to these, note that the solution to MMFF is equivalent to the solution of the random effects model where $Y_{i,j}$ is Gaussian with mean $U_i^⊤V_j$ and variance 1. In the emIRT model, there are also fixed effects for items but the random effects part is identical to the MMMF model. So, SoftImpute and emIRT minimize very similar models, the first one only captures the random effects and the latter one captures both random effects and fixed effects for items. 
 
