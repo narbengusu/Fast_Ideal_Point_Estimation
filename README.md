@@ -61,7 +61,9 @@ Below is the histogram of normalized ratings using that normalization approach.
 
 After the normalization, deciding on a threshold is still an important step. Two alternative thresholds are examined. In the first one, a rating was deemed positive if it was at least 1 point higher than the user’s mean reviews. However, this model was highly conservative, assigning a significant amount of ratings as bad reviews. Indeed, with this method, 20% of the users did not give any positive ratings. In the second threshold alternative, a rating is considered positive if it is strictly greater than the user’s mean rating. This alternative is chosen because it conveys the information of what each user liked without being extremely conservative. The formulation of normalization is given below where $y_{i,j}$ is the rating given by user $i$ to movie $j$ and $\mu_i$ is the mean rating given by user $i$.
 
- \(y^*_{i,j} =  y_{i,j}  -\mu_i\)
+ ```math
+ y^*_{i,j} =  y_{i,j}  -\mu_i
+```
   
 
 ### 2.3 Train Test Split
