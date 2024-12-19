@@ -1,8 +1,9 @@
 # upload data here
-
-setwd("/Users/bengusunar/Dropbox/movie_lens_data_glmm_recomm/ideal_point_estimation_movie/1M-Clean-Data")
-
+main_dir <- getwd()
+setwd("1M-Clean-Data")
 data <- read.csv("1M_wide_df.csv", row.names = 1)
+setwd(main_dir)
+
 matrixdata = as.matrix(data)
 library(softImpute)
 
@@ -100,7 +101,6 @@ ggplot(df, aes(x = lambda, y = error)) +
 svdobject = softImpute(matrixdata, rank.max = 1, lambda = 0)
 solution_matrix = complete(matrixdata, svdobject)
 
-setwd("/Users/bengusunar/Dropbox/movie_lens_data_glmm_recomm/ideal_point_estimation_movie/Final-Estimations")
-
+setwd("Final-Estimations")
 write.csv(solution_matrix, "softImpute_estimations.csv", row.names=FALSE)
-
+setwd(main_dir)
